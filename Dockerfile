@@ -1,6 +1,6 @@
-FROM php:8.0-alpine
+FROM php:7.4-alpine
 
-RUN	echo "upload_max_filesize = 128M" >> /usr/local/etc/php/conf.d/0-upload_large_dumps.ini \
+RUN	echo "upload_max_filesize = 1028M" >> /usr/local/etc/php/conf.d/0-upload_large_dumps.ini \
 &&	echo "post_max_size = 128M" >> /usr/local/etc/php/conf.d/0-upload_large_dumps.ini \
 &&	echo "memory_limit = 1G" >> /usr/local/etc/php/conf.d/0-upload_large_dumps.ini \
 &&	echo "max_execution_time = 600" >> /usr/local/etc/php/conf.d/0-upload_large_dumps.ini \
@@ -21,6 +21,7 @@ RUN	set -x \
 	postgresql-dev \
 	sqlite-dev \
 	unixodbc-dev \
+	bash \
 	freetds-dev \
 &&	docker-php-ext-configure pdo_odbc --with-pdo-odbc=unixODBC,/usr \
 &&	docker-php-ext-install \
@@ -37,7 +38,19 @@ RUN	set -x \
 	)" \
 &&	apk add --virtual .phpexts-rundeps $runDeps \
 &&	apk del --no-network .build-deps
-RUN apk update && apk add php8-dev gcc g++ make
+RUN apk update && apk add gcc g++ \
+	make \
+	openssl \
+	openssl-dev \
+	make \
+	zlib-dev \
+	gdbm \
+	libsasl \
+	snappy \
+	openrc \
+	nano \
+	bash \
+	$PHPIZE_DEPS
 # RUN docker-php-ext-install mongodb
 RUN pecl install mongodb \
     &&  echo "extension=mongodb.so" > $PHP_INI_DIR/conf.d/mongo.ini
