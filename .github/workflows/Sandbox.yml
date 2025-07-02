@@ -41,13 +41,22 @@ jobs:
           echo "DOCKER_TAG=$FINAL_TAG" >> $GITHUB_OUTPUT
           echo "TARGET=${{ secrets.SLACK_WEBHOOK }}" >> $GITHUB_OUTPUT
         fi
-
-    - name: Build and Push Docker Image
+    - name: Build the Docker image
       env:
         LLC_ECR_HOST: ${{ secrets.LLC_ECR_HOST }}
-        DOCKER_TAG: ${{ steps.vars.outputs.DOCKER_TAG }}
+        TAG: ${{ env.TAG }}
+        REPOSITORY: "sandbox-${GITHUB_REPOSITORY#*/}"
       run: |
-        IMAGE="${LLC_ECR_HOST}/${DOCKER_TAG}"
-        echo "Building image: $IMAGE"
-        docker build . --file Dockerfile --tag "$IMAGE"
-        docker push "$IMAGE"
+        docker build . --file Dockerfile --tag ${LLC_ECR_HOST}/$REPOSITORY:$TAG
+        docker push ${LLC_ECR_HOST}/$REPOSITORY:$TAG
+    
+
+    # - name: Build and Push Docker Image
+    #   env:
+    #     LLC_ECR_HOST: ${{ secrets.LLC_ECR_HOST }}
+    #     DOCKER_TAG: ${{ steps.vars.outputs.DOCKER_TAG }}
+    #   run: |
+    #     IMAGE="${LLC_ECR_HOST}/${DOCKER_TAG}"
+    #     echo "Building image: $IMAGE"
+    #     docker build . --file Dockerfile --tag "$IMAGE"
+    #     docker push "$IMAGE"
