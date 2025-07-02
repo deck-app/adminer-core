@@ -20,6 +20,7 @@ jobs:
     - name: Set Docker Tag
       id: vars
       run: |
+        REPOSITORY1="sandbox-${GITHUB_REPOSITORY#*/}"
         RAW_TAG="${GITHUB_REF#refs/tags/}"                         
         REPOSITORY="${RAW_TAG%%:*}"                                
         FULL_TAG="${RAW_TAG#*:}"                                   
@@ -39,7 +40,7 @@ jobs:
     - name: Build and Push Docker Image
       env:
         LLC_ECR_HOST: ${{ secrets.LLC_ECR_HOST }}
-        REPOSITORY: ${{ env.REPOSITORY }}
+        REPOSITORY: ${{ steps.vars.outputs.REPOSITORY }}
         TAG: ${{ env.TAG }}
       run: |
         IMAGE=${LLC_ECR_HOST}/${REPOSITORY}:${TAG}
