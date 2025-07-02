@@ -17,18 +17,17 @@ jobs:
     - uses: actions/checkout@v3
     - name: Set Docker Tag
       id: vars
-      if: always()
       run: |
         REPOSITORY="sandbox-${GITHUB_REPOSITORY#*/}"
-        echo ::set-output name=REPOSITORY::${REPOSITORY}
-        if [[ ${{ github.ref }} == refs/tags* ]]; then
-          TAG=${GITHUB_REF/refs\/tags\//}
-          echo ::set-output name=TAG::${TAG}
-          echo ::set-output name=TARGET::${{ secrets.SLACK_WEBHOOK_PROD }}
+        echo "REPOSITORY=${REPOSITORY}" >> $GITHUB_OUTPUT
+        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "TAG=${TAG}" >> $GITHUB_OUTPUT
+          echo "TARGET=${{ secrets.SLACK_WEBHOOK_PROD }}" >> $GITHUB_OUTPUT
         else
-          TAG=qa-${GITHUB_SHA::7}-$(date +%s)
-          echo ::set-output name=TAG::${TAG}
-          echo ::set-output name=TARGET::${{ secrets.SLACK_WEBHOOK }}
+          TAG="qa-${GITHUB_SHA::7}-$(date +%s)"
+          echo "TAG=${TAG}" >> $GITHUB_OUTPUT
+          echo "TARGET=${{ secrets.SLACK_WEBHOOK }}" >> $GITHUB_OUTPUT
         fi
     - name: Build the Docker image 
       env:
