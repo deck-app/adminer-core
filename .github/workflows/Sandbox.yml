@@ -26,14 +26,14 @@ jobs:
         FULL_TAG="${RAW_TAG#*:}"                                   
         CLEAN_TAG="${FULL_TAG#sandbox-}"                           
 
-        echo "REPOSITORY=$REPOSITORY"
+        echo "REPOSITORY1=$REPOSITORY1"
         echo "CLEAN_TAG=$CLEAN_TAG"
 
-        echo "REPOSITORY=$REPOSITORY" >> $GITHUB_ENV
+        echo "REPOSITORY1=$REPOSITORY1" >> $GITHUB_ENV
         echo "TAG=$CLEAN_TAG" >> $GITHUB_ENV
         echo "TARGET=${{ secrets.SLACK_WEBHOOK_PROD }}" >> $GITHUB_ENV
 
-        echo "::set-output name=REPOSITORY::$REPOSITORY"
+        echo "::set-output name=REPOSITORY1::$REPOSITORY1"
         echo "::set-output name=TAG::$CLEAN_TAG"
         echo "::set-output name=TARGET::${{ secrets.SLACK_WEBHOOK_PROD }}"
 
