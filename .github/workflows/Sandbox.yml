@@ -40,7 +40,7 @@ jobs:
     - name: Build and Push Docker Image
       env:
         LLC_ECR_HOST: ${{ secrets.LLC_ECR_HOST }}
-        REPOSITORY: ${{ steps.vars.outputs.REPOSITORY }}
+        REPOSITORY: ${{ steps.vars.outputs.REPOSITORY1 }}
         TAG: ${{ env.TAG }}
       run: |
         IMAGE=${LLC_ECR_HOST}/${REPOSITORY}:${TAG}
