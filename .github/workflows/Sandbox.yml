@@ -32,11 +32,21 @@ jobs:
           echo ::set-output name=TAG::${TAG}
           echo ::set-output name=TARGET::${{ secrets.SLACK_WEBHOOK }}
         fi
+    - name: Clean Docker Tag
+      run: |
+        RAW_TAG="sandbox-adminer-core:sandbox-1.1.3"
+    
+        REPO_NAME="${RAW_TAG%%:*}"
+        TAG_NAME="${RAW_TAG#*:}"
+        CLEAN_TAG="${TAG_NAME#sandbox-}"
+    
+        FINAL_TAG="${REPO_NAME}:${CLEAN_TAG}"
+        echo "Final Docker tag: $FINAL_TAG"
     - name: Build the Docker image 
       env:
         LLC_ECR_HOST: ${{ secrets.LLC_ECR_HOST }}
         TAG: ${{ steps.vars.outputs.TAG }}
         REPOSITORY: ${{ steps.vars.outputs.REPOSITORY }}
       run: |
-        docker build . --file Dockerfile --tag ${LLC_ECR_HOST}/$REPOSITORY:$TAG
-        docker push ${LLC_ECR_HOST}/$REPOSITORY:$TAG
+        docker build . --file Dockerfile --tag ${LLC_ECR_HOST}/$REPOSITORY:$FINAL_TAG
+        docker push ${LLC_ECR_HOST}/$REPOSITORY:$FINAL_TAG
