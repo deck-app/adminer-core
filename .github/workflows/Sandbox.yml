@@ -26,8 +26,8 @@ jobs:
         FULL_TAG="${RAW_TAG#*:}"                                   
         CLEAN_TAG="${FULL_TAG#sandbox-}"                           
 
-        echo "REPOSITORY1=$REPOSITORY1"
-        echo "CLEAN_TAG=$CLEAN_TAG"
+        # echo "REPOSITORY1=$REPOSITORY1"
+        # echo "CLEAN_TAG=$CLEAN_TAG"
 
         echo "REPOSITORY1=$REPOSITORY1" >> $GITHUB_ENV
         echo "TAG=$CLEAN_TAG" >> $GITHUB_ENV
