@@ -44,7 +44,7 @@ jobs:
     - name: Build the Docker image
       env:
         LLC_ECR_HOST: ${{ secrets.LLC_ECR_HOST }}
-        TAG: ${{ steps.vars.output.FINAL_TAG }}
+        TAG: ${{ steps.vars.output.DOCKER_TAG }}
         REPOSITORY: ${{ steps.vars.outputs.REPOSITORY }}
       run: |
         docker build . --file Dockerfile --tag ${LLC_ECR_HOST}/$REPOSITORY:$TAG
