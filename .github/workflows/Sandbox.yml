@@ -2,7 +2,7 @@ name: QA-Prod
 
 on:
   workflow_dispatch: # used for QA Deployments
-  push:              # used for Prod/Stg image building
+  push:
     tags:
       - 'sandbox-*'
       - '[0-9]+.[0-9]+.[0-9]+'
@@ -13,48 +13,36 @@ jobs:
       contents: read
       pull-requests: write
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v3
+
     - name: Set Docker Tag
       id: vars
-      if: always()
       run: |
-        REPOSITORY="sandbox-${GITHUB_REPOSITORY#*/}"
-        echo ::set-output name=REPOSITORY::${REPOSITORY}
-        
-        if [[ ${{ github.ref }} == refs/tags* ]]; then
-          RAW_TAG=${GITHUB_REF#refs/tags/}
-          VERSION_TAG=${RAW_TAG##*:}
-          echo ::set-output name=TAG::${VERSION_TAG}
-          echo ::set-output name=TARGET::${{ secrets.SLACK_WEBHOOK_PROD }}
-          REPO_NAME="${RAW_TAG%%:*}"
-          CLEAN_TAG="${RAW_TAG#sandbox-}"
-          TAG="${REPO_NAME}:${CLEAN_TAG}"
-          echo "Final Docker tag: $TAG"
-        else
-          TAG=qa-${GITHUB_SHA::7}-$(date +%s)
-          echo ::set-output name=TAG::${TAG}
-          echo ::set-output name=TARGET::${{ secrets.SLACK_WEBHOOK }}
-          REPO_NAME="${RAW_TAG%%:*}"
-          CLEAN_TAG="${RAW_TAG#sandbox-}"
-          TAG="${REPO_NAME}:${CLEAN_TAG}"
-          echo "Final Docker tag: $TAG"
-        fi
-    # - name: Clean Docker Tag
-    #   run: |
-    #     RAW_TAG="sandbox-adminer-core:sandbox-1.1.3"
-    
-    #     REPO_NAME="${RAW_TAG%%:*}"
-    #     TAG_NAME="${RAW_TAG#*:}"
-    #     CLEAN_TAG="${TAG_NAME#sandbox-}"
-    
-    #     FINAL_TAG="${REPO_NAME}:${CLEAN_TAG}"
-    #     echo "Final Docker tag: $FINAL_TAG"
-    - name: Build the Docker image 
+        RAW_TAG="${GITHUB_REF#refs/tags/}"                         
+        REPOSITORY="${RAW_TAG%%:*}"                                
+        FULL_TAG="${RAW_TAG#*:}"                                   
+        CLEAN_TAG="${FULL_TAG#sandbox-}"                           
+
+        echo "REPOSITORY=$REPOSITORY"
+        echo "CLEAN_TAG=$CLEAN_TAG"
+
+        echo "REPOSITORY=$REPOSITORY" >> $GITHUB_ENV
+        echo "TAG=$CLEAN_TAG" >> $GITHUB_ENV
+        echo "TARGET=${{ secrets.SLACK_WEBHOOK_PROD }}" >> $GITHUB_ENV
+
+        echo "::set-output name=REPOSITORY::$REPOSITORY"
+        echo "::set-output name=TAG::$CLEAN_TAG"
+        echo "::set-output name=TARGET::${{ secrets.SLACK_WEBHOOK_PROD }}"
+
+    - name: Build and Push Docker Image
       env:
         LLC_ECR_HOST: ${{ secrets.LLC_ECR_HOST }}
-        TAG: ${{ steps.vars.outputs.TAG }}
-        REPOSITORY: ${{ steps.vars.outputs.REPOSITORY }}
+        REPOSITORY: ${{ env.REPOSITORY }}
+        TAG: ${{ env.TAG }}
       run: |
-        docker build . --file Dockerfile --tag ${LLC_ECR_HOST}/$REPOSITORY:$TAG
-        docker push ${LLC_ECR_HOST}/$REPOSITORY:$TAG
+        IMAGE=${LLC_ECR_HOST}/${REPOSITORY}:${TAG}
+        echo "Building Docker image: $IMAGE"
+        docker build . --file Dockerfile --tag "$IMAGE"
+        docker push "$IMAGE"
