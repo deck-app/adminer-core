@@ -28,14 +28,14 @@ jobs:
           VERSION_WITH_SANDBOX="${RAW_TAG#*:}"       # e.g., sandbox-1.1.3
           VERSION="${VERSION_WITH_SANDBOX#sandbox-}" # e.g., 1.1.3
           
-          FINAL_TAG="${REPO_NAME}:${VERSION}"        # e.g., sandbox-adminer-core:1.1.3
+          FINAL_TAG="${VERSION}"        # e.g., sandbox-adminer-core:1.1.3
 
           echo "TAG=$VERSION" >> $GITHUB_OUTPUT
           echo "DOCKER_TAG=$FINAL_TAG" >> $GITHUB_OUTPUT
           echo "TARGET=${{ secrets.SLACK_WEBHOOK_PROD }}" >> $GITHUB_OUTPUT
         else
           TAG="qa-${GITHUB_SHA::7}-$(date +%s)"
-          FINAL_TAG="${REPOSITORY}:${TAG}"
+          FINAL_TAG="${TAG}"
 
           echo "TAG=$TAG" >> $GITHUB_OUTPUT
           echo "DOCKER_TAG=$FINAL_TAG" >> $GITHUB_OUTPUT
