@@ -1,0 +1,40 @@
+name: QA-Prod
+
+on:
+  workflow_dispatch: # used for QA Deployments
+  push:              # used for Prod/Stg image building
+    tags:
+      - 'sandbox-*'
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  build:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set Docker Tag
+      id: vars
+      if: always()
+      run: |
+        REPOSITORY="sandbox-${GITHUB_REPOSITORY#*/}"
+        echo ::set-output name=REPOSITORY::${REPOSITORY}
+        if [[ ${{ github.ref }} == refs/tags* ]]; then
+          TAG=${GITHUB_REF/refs\/tags\//}
+          echo ::set-output name=TAG::${TAG}
+          echo ::set-output name=TARGET::${{ secrets.SLACK_WEBHOOK_PROD }}
+        else
+          TAG=qa-${GITHUB_SHA::7}-$(date +%s)
+          echo ::set-output name=TAG::${TAG}
+          echo ::set-output name=TARGET::${{ secrets.SLACK_WEBHOOK }}
+        fi
+    - name: Build the Docker image 
+      env:
+        LLC_ECR_HOST: ${{ secrets.LLC_ECR_HOST }}
+        TAG: ${{ steps.vars.outputs.TAG }}
+        REPOSITORY: ${{ steps.vars.outputs.REPOSITORY }}
+      run: |
+        docker build . --file Dockerfile --tag ${LLC_ECR_HOST}/$REPOSITORY:$TAG
+        docker push ${LLC_ECR_HOST}/$REPOSITORY:$TAG
