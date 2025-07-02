@@ -45,7 +45,7 @@ jobs:
       env:
         LLC_ECR_HOST: ${{ secrets.LLC_ECR_HOST }}
         TAG: ${{ env.TAG }}
-        REPOSITORY: "sandbox-${GITHUB_REPOSITORY#*/}"
+        REPOSITORY: ${{ steps.vars.outputs.REPOSITORY }}
       run: |
         docker build . --file Dockerfile --tag ${LLC_ECR_HOST}/$REPOSITORY:$TAG
         docker push ${LLC_ECR_HOST}/$REPOSITORY:$TAG
