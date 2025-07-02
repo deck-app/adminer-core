@@ -47,7 +47,7 @@ jobs:
         TAG: ${{ steps.vars.outputs.DOCKER_TAG }}
         REPOSITORY: ${{ steps.vars.outputs.REPOSITORY }}
       run: |
-        docker build . --file Dockerfile --tag ${LLC_ECR_HOST}/$REPOSITORY:$TAG
+        docker build . --file Dockerfile --tag $REPOSITORY:$TAG
         docker push ${LLC_ECR_HOST}/$REPOSITORY:$TAG
     
 
